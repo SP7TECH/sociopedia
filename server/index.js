@@ -13,6 +13,7 @@ import { fileURLToPath } from "url";
 
 import { register } from "./controllers/auth.js";
 import authRoutes from "./routes/auth.js";
+import userRoutes from "./routes/user.js";
 
 // CONFIG
 
@@ -51,6 +52,7 @@ app.post("/api/auth/register", upload.single("picture"), register);
 // ROUTES WITH FILES
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 export let client;
 
