@@ -6,11 +6,11 @@
   box-sizing: border-box;
 }
 
-html {
+/* html {
   font-size: 10px;
 }
 
 body {
-  font-size: 1.6rem;
+  font-size: 1.6rem !important;
   font-family: "Rubik", sans-serif;
-}
+} */
