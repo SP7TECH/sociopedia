@@ -50,14 +50,14 @@ const upload = multer({ storage });
 
 // ROUTES WITH FILES
 
-app.post("/api/auth/register", upload.single("picture"), register);
-app.post("/api/posts/", verifyToken, upload.single("picture"), createPosts);
+app.post("/auth/register", upload.single("picture"), register);
+app.post("/posts/", verifyToken, upload.single("picture"), createPosts);
 
 // ROUTES WITH FILES
 
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/posts", postRoutes);
+app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
+app.use("/posts", postRoutes);
 
 export let client;
 
