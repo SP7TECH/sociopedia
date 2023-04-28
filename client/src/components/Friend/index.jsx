@@ -23,14 +23,17 @@ const Friends = ({ friendId, name, subtitle, userPicturePath }) => {
 
   const patchFriend = async () => {
     const response = await fetch(
-      `http://localhost:3001/users/${id}/${friendId}`,
+      `http://localhost:3001/users/${_id}/${friendId}`,
       {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       },
     );
 
-    const data = response.json();
+    const data = await response.json();
     dispatch(setFriends({ friends: data }));
   };
 

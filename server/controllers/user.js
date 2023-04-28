@@ -5,10 +5,7 @@ export const getUser = async (req, res) => {
   try {
     const { id } = req.params;
     let userId = new ObjectId(id);
-    const user = await client
-      .db("sociopedia")
-      .collection("users")
-      .findOne({ _id: userId });
+    const user = await client.db("sociopedia").collection("users").findOne({ _id: userId });
 
     return res.status(200).json(user);
   } catch (error) {
@@ -20,10 +17,7 @@ export const getUserFriends = async (req, res) => {
   try {
     const { id } = req.params;
     let userId = new ObjectId(id);
-    const user = await client
-      .db("sociopedia")
-      .collection("users")
-      .findOne({ _id: userId });
+    const user = await client.db("sociopedia").collection("users").findOne({ _id: userId });
 
     const friends = await Promise.all(
       user.friends.map((el) => {
@@ -32,11 +26,9 @@ export const getUserFriends = async (req, res) => {
       })
     );
 
-    const formattedFriends = friends.map(
-      ({ _id, firstName, lastName, occupation, location, picturePath }) => {
-        return { _id, firstName, lastName, occupation, location, picturePath };
-      }
-    );
+    const formattedFriends = friends.map(({ _id, firstName, lastName, occupation, location, picturePath }) => {
+      return { _id, firstName, lastName, occupation, location, picturePath };
+    });
 
     return res.status(200).json(formattedFriends);
   } catch (error) {
@@ -51,15 +43,10 @@ export const addRemoveFriends = async (req, res) => {
     const { id, friendId } = req.params;
 
     let userId = new ObjectId(id);
-    let friendID = new ObjectId(id);
-    const user = await client
-      .db("sociopedia")
-      .collection("users")
-      .findOne({ _id: userId });
-    const friend = await await client
-      .db("sociopedia")
-      .collection("users")
-      .findOne({ _id: friendID });
+    let friendID = new ObjectId(friendId);
+    const user = await client.db("sociopedia").collection("users").findOne({ _id: userId });
+
+    const friend = await client.db("sociopedia").collection("users").findOne({ _id: friendID });
 
     // If the user is already a friend
     if (user.friends.includes(friendId)) {
@@ -67,7 +54,6 @@ export const addRemoveFriends = async (req, res) => {
       friend.friends = friend.friends.filter((id) => id !== id);
     } else {
       // If the user is not a friend
-
       user.friends.push(friendId);
       friend.friends.push(id);
     }
@@ -75,31 +61,27 @@ export const addRemoveFriends = async (req, res) => {
     await client
       .db("sociopedia")
       .collection("users")
-      .updateOne(
-        { _id: id },
-        { $set: { friends: user.friends } },
-        { $upsert: true }
-      );
+      .updateOne({ _id: userId }, { $set: { friends: user.friends } }, { $upsert: true });
     await client
       .db("sociopedia")
       .collection("users")
-      .updateOne(
-        { _id: friendId },
-        { $set: { friends: friend.friends } },
-        { $upsert: true }
-      );
+      .updateOne({ _id: friendID }, { $set: { friends: friend.friends } }, { $upsert: true });
 
-    const friendList = await Promise.all(
-      user.friends.map((el) =>
-        client.db("sociopedia").collection("users").find({ _id: el })
-      )
-    );
+    let tempUserFriendArr = [];
+    if (user.friends.length > 0)
+      user.friends.forEach((el) => {
+        tempUserFriendArr.push(new ObjectId(el));
+      });
 
-    const formattedFriends = friendList.map(
-      ({ _id, firstName, lastName, occupation, location, picturePath }) => {
-        return { _id, firstName, lastName, occupation, location, picturePath };
-      }
-    );
+    const friendList = await client
+      .db("sociopedia")
+      .collection("users")
+      .find({ _id: { $in: tempUserFriendArr } })
+      .toArray();
+
+    const formattedFriends = friendList.map(({ _id, firstName, lastName, occupation, location, picturePath }) => {
+      return { _id, firstName, lastName, occupation, location, picturePath };
+    });
 
     return res.status(200).json(formattedFriends);
   } catch (error) {

@@ -29,7 +29,7 @@ const PostWidget = ({
   const loggedInUserId = useSelector((state) => state.user._id);
 
   const isLiked = Boolean(likes[loggedInUserId]);
-  const likeCount = Object.keys(likes).length;
+  const likeCount = Object.values(likes).filter(Boolean).length;
 
   const theme = useTheme();
   const main = theme.palette.neutral.main;
@@ -42,7 +42,7 @@ const PostWidget = ({
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify,
+      body: JSON.stringify({ userId: loggedInUserId }),
     });
 
     const updatedPost = await response.json();
@@ -72,7 +72,7 @@ const PostWidget = ({
           <FlexBetween gap="0.3rem">
             <IconButton onClick={patchLike}>
               {isLiked ? (
-                <FavoriteOutlined sx={{ color: primary }} />
+                <FavoriteOutlined sx={{ color: medium }} />
               ) : (
                 <FavoriteBorderOutlined />
               )}
@@ -97,13 +97,13 @@ const PostWidget = ({
         <Box mt="0.5rem">
           {comments.map(({ comment, i }) => (
             <Box key={`${name}-${i}`}>
-              <Divide />
+              <Divider />
               <Typography sx={{ color: main, m: "0.5rem 0", pl: "1rem" }}>
                 {comment}
               </Typography>
             </Box>
           ))}
-          <Divide />
+          <Divider />
         </Box>
       )}
     </WidgetWrapper>

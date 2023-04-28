@@ -8,10 +8,7 @@ export const createPosts = async (req, res) => {
     const { userId, description, picturePath } = req.body;
 
     let userID = new ObjectId(userId);
-    const user = await client
-      .db("sociopedia")
-      .collection("users")
-      .findOne({ _id: userID });
+    const user = await client.db("sociopedia").collection("users").findOne({ _id: userID });
 
     await client.db("sociopedia").collection("posts").insertOne({
       userId: userID,
@@ -25,7 +22,7 @@ export const createPosts = async (req, res) => {
       comments: [],
     });
 
-    const posts = await client.db("sociopedia").collection("posts").find({});
+    const posts = await client.db("sociopedia").collection("posts").find({}).toArray();
     res.status(201).json(posts);
   } catch (error) {
     return res.status(409).send({ message: error.message });
@@ -37,7 +34,7 @@ export const createPosts = async (req, res) => {
 export const getFeedPosts = async (req, res) => {
   try {
     const posts = await client.db("sociopedia").collection("posts").find({});
-    const results = posts.toArray();
+    const results = await posts.toArray();
 
     return res.status(200).json(results);
   } catch (error) {
@@ -50,11 +47,8 @@ export const getUserPosts = async (req, res) => {
     const { id } = req.params;
 
     let userId = new ObjectId(id);
-    const posts = await client
-      .db("sociopedia")
-      .collection("posts")
-      .find({ userId: userId });
-    const results = posts.toArray();
+    const posts = await client.db("sociopedia").collection("posts").find({ userId: userId });
+    const results = await posts.toArray();
 
     return res.status(200).json(results);
   } catch (error) {
@@ -70,25 +64,22 @@ export const likePost = async (req, res) => {
     const { userId } = req.body;
 
     let postId = new ObjectId(id);
-    const post = await client
-      .db("sociopedia")
-      .collection("posts")
-      .findOne({ _id: postId });
-    const isLiked = post.likes.get(userId);
+    const post = await client.db("sociopedia").collection("posts").findOne({ _id: postId });
 
-    if (isLiked) {
-      post.likes.delete(userId);
+    if (post.likes[userId] === true) {
+      post.likes[userId] = false;
     } else {
-      post.likes.set(userId, true);
+      post.likes[userId] = true;
     }
 
-    const updatedPost = await client
+    await client
       .db("sociopedia")
       .collection("posts")
-      .updateOne({ _id: postId }, { likes: post.likes });
+      .updateOne({ _id: postId }, { $set: { likes: post.likes } });
+    const posts = await client.db("sociopedia").collection("posts").findOne({ _id: postId });
 
-    res.status(200).json(updatedPost);
+    res.status(200).json(posts);
   } catch (error) {
-    return res.status().send({ message: error.message });
+    return res.status(400).send({ message: error.message });
   }
 };

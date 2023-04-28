@@ -12,7 +12,7 @@ export const register = async (req, res) => {
       email,
       password,
       picturePath,
-      friends,
+      friends = [],
       location,
       occupation,
     } = req.body;
